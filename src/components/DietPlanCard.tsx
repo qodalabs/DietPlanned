@@ -8,6 +8,7 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 export function DietPlanCard({ plan }: { plan: DietPlan }) {
   const router = useRouter()
   const [busy, setBusy] = useState<null | 'regen' | 'delete'>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const rotateX = useMotionValue(0)
   const rotateY = useMotionValue(0)
