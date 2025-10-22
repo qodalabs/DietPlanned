@@ -3,6 +3,7 @@ import { createDb } from '@/lib/db'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import type { Metadata } from 'next'
 import PlanActions from './PlanActions'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,11 +24,14 @@ export default async function DietPlanPage({ params }: Props) {
   const supabase = getSupabaseServer()
   const db = createDb(supabase)
   const plan = await db.findPlanById(params.id)
+  if (!plan) {
+    // If a plan was deleted or not found, bounce to dashboard
+    return redirect('/dashboard')
+  }
   return (
     <main>
       <Navbar authed />
       <div className="mx-auto max-w-4xl px-4 py-10">
-        {!plan && <div>Plan not found.</div>}
         {plan && (
           <article className="prose max-w-none">
             <h1 className="text-3xl font-bold tracking-tight">{plan.title}</h1>
