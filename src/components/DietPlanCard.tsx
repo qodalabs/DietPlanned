@@ -1,9 +1,12 @@
 "use client"
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, useMotionValue } from 'framer-motion'
 import type { DietPlan } from '@/types/db'
+import { useRouter } from 'next/navigation'
 
 export function DietPlanCard({ plan }: { plan: DietPlan }) {
+  const router = useRouter()
+  const [busy, setBusy] = useState<null | 'regen' | 'delete'>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const rotateX = useMotionValue(0)
   const rotateY = useMotionValue(0)
@@ -47,6 +50,49 @@ export function DietPlanCard({ plan }: { plan: DietPlan }) {
         <span>Protein: {plan.meta?.protein ?? '—'}g</span>
         <span>Carbs: {plan.meta?.carbs ?? '—'}g</span>
         <span>Fat: {plan.meta?.fat ?? '—'}g</span>
+      </div>
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          aria-label="Regenerate plan"
+          onClick={async () => {
+            if (busy) return
+            setBusy('regen')
+            try {
+              const res = await fetch(`/api/plan/${plan.id}/regenerate`, { method: 'POST' })
+              const data = await res.json()
+              if (!res.ok) throw new Error(data.message || 'Failed to regenerate')
+              if (data.planId) window.location.href = `/dashboard/plan/${data.planId}`
+            } catch (e: any) {
+              alert(e.message || 'Could not regenerate plan')
+            } finally {
+              setBusy(null)
+            }
+          }}
+          className={`px-3 py-1.5 rounded-md text-xs bg-brand-600 text-white hover:bg-brand-700 glow-orange transition-all active:scale-95 ${busy === 'regen' ? 'opacity-60 pointer-events-none' : ''}`}
+        >
+          {busy === 'regen' ? 'Regenerating…' : 'Regenerate'}
+        </button>
+        <button
+          aria-label="Delete plan"
+          onClick={async () => {
+            if (busy) return
+            if (!confirm('Delete this plan permanently?')) return
+            setBusy('delete')
+            try {
+              const res = await fetch(`/api/plan/${plan.id}`, { method: 'DELETE' })
+              const data = await res.json().catch(() => ({}))
+              if (!res.ok) throw new Error(data.message || 'Failed to delete')
+              router.refresh()
+            } catch (e: any) {
+              alert(e.message || 'Could not delete plan')
+            } finally {
+              setBusy(null)
+            }
+          }}
+          className={`px-3 py-1.5 rounded-md text-xs border border-gray-700 text-gray-200 hover:text-red-400 hover:border-red-500 transition-all active:scale-95 ${busy === 'delete' ? 'opacity-60 pointer-events-none' : ''}`}
+        >
+          {busy === 'delete' ? 'Deleting…' : 'Delete'}
+        </button>
       </div>
     </motion.article>
   )
