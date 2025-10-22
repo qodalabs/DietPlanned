@@ -142,11 +142,13 @@ export function createDb(supabase: SupabaseClient) {
     return data ? mapPlan(data) : undefined
   },
   async deletePlanById(id: string, userId: string): Promise<boolean> {
+    // For Supabase, count is only returned when chaining select() after delete()
     const { error, count } = await supabase
       .from('diet_plans')
-      .delete({ count: 'exact' })
+      .delete()
       .eq('id', id)
       .eq('user_id', userId)
+      .select('*', { count: 'exact' })
     if (error) throw error
     return (count || 0) > 0
   },
