@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseServer } from '@/lib/supabase-server'
-import { db } from '@/lib/db'
+import { getSupabaseRoute } from '@/lib/supabase-server'
+import { createDb } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  const supabase = getSupabaseServer()
+  const supabase = getSupabaseRoute()
+  const db = createDb(supabase)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
   try {
@@ -17,4 +18,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: err.message || 'Profile upsert error' }, { status: 400 })
   }
 }
-
