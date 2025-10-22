@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react'
 import { motion, useMotionValue } from 'framer-motion'
 import type { DietPlan } from '@/types/db'
 import { useRouter } from 'next/navigation'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 export function DietPlanCard({ plan }: { plan: DietPlan }) {
   const router = useRouter()
@@ -74,19 +75,35 @@ export function DietPlanCard({ plan }: { plan: DietPlan }) {
         </button>
         <button
           aria-label="Delete plan"
-          onClick={async () => {
+          onClick={() => {
             if (busy) return
-            if (!confirm('Delete this plan permanently?')) return
+            setShowConfirm(true)
+          }}
+          className={`px-3 py-1.5 rounded-md text-xs border border-gray-700 text-gray-200 hover:text-red-400 hover:border-red-500 transition-all active:scale-95 ${busy === 'delete' ? 'opacity-60 pointer-events-none' : ''}`}
+        >
+          {busy === 'delete' ? 'Deleting…' : 'Delete'}
+        </button>
+        <ConfirmDialog
+          open={showConfirm}
+          title="Delete this plan?"
+          message="This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          busy={busy === 'delete'}
+          onCancel={() => { if (busy !== 'delete') setShowConfirm(false) }}
+          onConfirm={async () => {
+            if (busy) return
             setBusy('delete')
             try {
               const res = await fetch(`/api/plan/${plan.id}`, { method: 'DELETE' })
               const data = await res.json().catch(() => ({}))
               if (!res.ok) throw new Error(data.message || 'Failed to delete')
+              setShowConfirm(false)
               // Force reload so server components refetch and card disappears
               if (typeof window !== 'undefined') {
                 window.location.reload()
               } else {
-                router.replace('/dashboard');
+                router.replace('/dashboard')
                 router.refresh()
               }
             } catch (e: any) {
@@ -95,10 +112,7 @@ export function DietPlanCard({ plan }: { plan: DietPlan }) {
               setBusy(null)
             }
           }}
-          className={`px-3 py-1.5 rounded-md text-xs border border-gray-700 text-gray-200 hover:text-red-400 hover:border-red-500 transition-all active:scale-95 ${busy === 'delete' ? 'opacity-60 pointer-events-none' : ''}`}
-        >
-          {busy === 'delete' ? 'Deleting…' : 'Delete'}
-        </button>
+        />
       </div>
     </motion.article>
   )

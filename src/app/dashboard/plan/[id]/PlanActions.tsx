@@ -1,6 +1,7 @@
 "use client"
 import React, { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 function RippleButton({ onClick, children, className }: { onClick: () => void; children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLButtonElement>(null)
@@ -29,6 +30,7 @@ function RippleButton({ onClick, children, className }: { onClick: () => void; c
 export default function PlanActions({ planId }: { planId: string }) {
   const router = useRouter()
   const [busy, setBusy] = useState<'regen' | 'delete' | null>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
   async function handleRegenerate() {
     if (busy) return
     setBusy('regen')
@@ -46,18 +48,7 @@ export default function PlanActions({ planId }: { planId: string }) {
 
   async function handleDelete() {
     if (busy) return
-    if (!confirm('Delete this plan permanently?')) return
-    setBusy('delete')
-    try {
-      const res = await fetch(`/api/plan/${planId}`, { method: 'DELETE' })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.message || 'Failed to delete')
-      router.replace('/dashboard')
-    } catch (e: any) {
-      alert(e.message || 'Could not delete plan')
-    } finally {
-      setBusy(null)
-    }
+    setShowConfirm(true)
   }
   return (
     <div className="mt-8 flex gap-3 print:hidden">
@@ -85,6 +76,30 @@ export default function PlanActions({ planId }: { planId: string }) {
       >
         {busy === 'delete' ? 'Deleting…' : 'Delete'}
       </RippleButton>
+      <ConfirmDialog
+        open={showConfirm}
+        title="Delete this plan?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        busy={busy === 'delete'}
+        onCancel={() => { if (busy !== 'delete') setShowConfirm(false) }}
+        onConfirm={async () => {
+          if (busy) return
+          setBusy('delete')
+          try {
+            const res = await fetch(`/api/plan/${planId}`, { method: 'DELETE' })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.message || 'Failed to delete')
+            setShowConfirm(false)
+            router.replace('/dashboard')
+          } catch (e: any) {
+            alert(e.message || 'Could not delete plan')
+          } finally {
+            setBusy(null)
+          }
+        }}
+      />
     </div>
   )
 }
