@@ -82,7 +82,13 @@ export function DietPlanCard({ plan }: { plan: DietPlan }) {
               const res = await fetch(`/api/plan/${plan.id}`, { method: 'DELETE' })
               const data = await res.json().catch(() => ({}))
               if (!res.ok) throw new Error(data.message || 'Failed to delete')
-              router.refresh()
+              // Force reload so server components refetch and card disappears
+              if (typeof window !== 'undefined') {
+                window.location.reload()
+              } else {
+                router.replace('/dashboard');
+                router.refresh()
+              }
             } catch (e: any) {
               alert(e.message || 'Could not delete plan')
             } finally {
