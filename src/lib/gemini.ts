@@ -130,6 +130,7 @@ Strict requirements:
 - Use simple, globally available foods. Include reasonable vegetarian swaps when helpful.
 - Times in 24h format HH:mm.
 - Keep names succinct; add optional "recipe" for one meal/day.
+ - Halal-friendly: Avoid pork, alcohol, and non-halal meats. Prefer halal-certified or plant-based proteins; use beef/chicken/turkey/seafood prepared in halal-friendly ways. Offer substitutions that maintain halal compliance.
 `
 
   const input = {

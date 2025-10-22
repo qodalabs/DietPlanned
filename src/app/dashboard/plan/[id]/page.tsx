@@ -60,7 +60,7 @@ export default async function DietPlanPage({ params }: Props) {
               ))}
             </div>
 
-            <PlanActions />
+            <PlanActions planId={params.id} />
 
             <script type="application/ld+json" suppressHydrationWarning>
               {JSON.stringify({

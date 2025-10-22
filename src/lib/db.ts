@@ -141,6 +141,15 @@ export function createDb(supabase: SupabaseClient) {
     if (error) throw error
     return data ? mapPlan(data) : undefined
   },
+  async deletePlanById(id: string, userId: string): Promise<boolean> {
+    const { error, count } = await supabase
+      .from('diet_plans')
+      .delete({ count: 'exact' })
+      .eq('id', id)
+      .eq('user_id', userId)
+    if (error) throw error
+    return (count || 0) > 0
+  },
   }
 }
 
