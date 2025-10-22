@@ -1,17 +1,41 @@
 "use client"
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useRef } from 'react'
+import { motion, useMotionValue } from 'framer-motion'
 import type { DietPlan } from '@/types/db'
 
 export function DietPlanCard({ plan }: { plan: DietPlan }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const rotateX = useMotionValue(0)
+  const rotateY = useMotionValue(0)
+
+  function handleMouseMove(e: React.MouseEvent) {
+    const el = cardRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+    const ry = (x - 0.5) * 10 // left/right tilt
+    const rx = -(y - 0.5) * 10 // up/down tilt
+    rotateX.set(rx)
+    rotateY.set(ry)
+  }
+
+  function handleMouseLeave() {
+    rotateX.set(0)
+    rotateY.set(0)
+  }
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, scale: 1.02, boxShadow: '0 10px 30px rgba(249,115,22,0.35)' }}
-      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      whileHover={{ y: -8, scale: 1.025, boxShadow: '0 14px 36px rgba(249,115,22,0.4)' }}
+      transition={{ type: 'spring', stiffness: 260, damping: 18 }}
       viewport={{ once: true, margin: '-40px' }}
-      className="rounded-xl border border-gray-800 p-5 bg-ink-800/60 text-white backdrop-blur hover:ring-2 hover:ring-brand-500"
+      className="rounded-xl border border-gray-800 p-5 bg-ink-800/60 text-white backdrop-blur hover:ring-2 hover:ring-brand-500 hover:shadow-glow-orange transition-all will-change-transform"
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      ref={cardRef as any}
     >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{plan.title}</h3>

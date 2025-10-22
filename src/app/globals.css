@@ -35,3 +35,17 @@ body {
   50%, 100% { opacity: 0; }
 }
 .tw-caret { animation: tw-blink 1s step-start infinite; }
+
+/* Ripple effect for buttons */
+.ripple {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: rgba(249, 115, 22, 0.35);
+  animation: ripple 600ms ease-out;
+}
+@keyframes ripple {
+  from { opacity: 0.5; transform: translate(-50%, -50%) scale(0); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(4); }
+}
