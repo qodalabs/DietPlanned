@@ -81,4 +81,11 @@ do $$ begin
     with check (true);
 exception when others then null; end $$;
 
+-- Allow authenticated users to delete only their own plans
+do $$ begin
+  create policy if not exists "plans delete own"
+    on public.diet_plans for delete
+    using (auth.uid() = user_id);
+exception when others then null; end $$;
+
 -- NOTE: For production, replace permissive policies with auth.uid() based policies.
