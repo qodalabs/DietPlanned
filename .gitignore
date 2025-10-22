@@ -1,0 +1,22 @@
+# Node/Next
+.next/
+node_modules/
+dist/
+out/
+
+# Env/Secrets
+.env
+.env.local
+.env.*.local
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.idea/
+.vscode/
+
+# Testing/coverage
+coverage/
+
